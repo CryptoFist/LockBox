@@ -1,2 +1,5 @@
 node_modules
+artifacts
+cache
 package-lock.json
+secrets.json
