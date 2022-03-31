@@ -10,7 +10,7 @@ contract Lockbox is Ownable, ILockbox {
    IERC20 private rewardToken;
    uint256 private expiration;
    mapping(address => RewardInfo[]) private rewardInfos; // user => rewardInfos
-   uint256 private rewardableAmount;
+   address[] private userList;
 
    constructor (address owner_, address token_, uint256 expiration_) {
       transferOwnership(owner_);
@@ -27,6 +27,9 @@ contract Lockbox is Ownable, ILockbox {
       require (amount_ > 0, 'lockbox: reward amount should be greater than zero');
 
       uint256 curTime = block.timestamp;
+      if (rewardInfos[recipient_].length == 0) {
+         userList.push(recipient_);
+      }
       rewardInfos[recipient_].push(RewardInfo({
          rewardAmount: amount_,
          rewardCreateTime: curTime,
@@ -52,14 +55,51 @@ contract Lockbox is Ownable, ILockbox {
 
    function getRewardList() external view override returns(RewardInfo[] memory) {
       require (_msgSender() != address(0), 'lockbox: zero address');
-      return rewardInfos[_msgSender()];
+      uint256 curTime = block.timestamp;
+      uint256 cnt = 0;
+      for (uint256 i = 0; i < rewardInfos[_msgSender()].length; i ++) {
+         if (rewardInfos[_msgSender()][i].rewardDeadline >= curTime) {
+            cnt ++;
+         }
+      }
+
+      RewardInfo[] memory infos = new RewardInfo[](cnt);
+      if (cnt == 0) {
+         return infos;
+      }
+
+      
+      uint256 index = 0;
+      for (uint256 i = 0; i < rewardInfos[_msgSender()].length; i ++) {
+         if (rewardInfos[_msgSender()][i].rewardDeadline < curTime) {
+            cnt ++;
+            infos[index++] = rewardInfos[_msgSender()][i];
+         }
+      }
+
+      return infos;
    }
 
    function setExpirationTime(uint256 expiration_) external onlyOwner override {
       expiration = expiration_;
    }
 
-   function withDraw() external onlyOwner override {
+   function reclaim_rewards() external onlyOwner override {
+      uint256 userCnt = userList.length;
+      uint256 curTime_ = block.timestamp;
+      uint256 rewardableAmount = 0;
+      for (uint256 i = 0; i < userCnt; i ++) {
+         address user_ = userList[i];
+         uint256 length = rewardInfos[user_].length;
+
+         for (uint256 j = 0; j < length; j ++) {
+            if (rewardInfos[user_][i].rewardDeadline < curTime_) {
+               rewardableAmount += rewardInfos[user_][i].rewardAmount;
+               rewardInfos[user_][i].rewardAmount = 0;
+            }
+         }
+      }
+      
       rewardToken.transfer(_msgSender(), rewardableAmount);
    }
 
