@@ -7,7 +7,6 @@ interface ILockbox {
    struct RewardInfo {
       uint256 rewardAmount;
       uint256 rewardCreateTime;
-      uint256 rewardDeadline;
       uint8 rewardID;
    }
 

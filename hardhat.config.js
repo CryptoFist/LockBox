@@ -4,6 +4,8 @@
  require("@nomiclabs/hardhat-waffle");
  require('@nomiclabs/hardhat-ethers');
  require("@nomiclabs/hardhat-etherscan");
+ require("hardhat-contract-sizer");
+require("solidity-coverage");
  
  const { deployerWalletPrivateKey } = require('./secrets.json');
  const { etherscanAPIkey } = require('./secrets.json');

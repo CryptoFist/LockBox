@@ -33,7 +33,6 @@ contract Lockbox is Ownable, ILockbox {
       rewardInfos[recipient_].push(RewardInfo({
          rewardAmount: amount_,
          rewardCreateTime: curTime,
-         rewardDeadline: curTime + expiration,
          rewardID: id_
       }));
    }
@@ -58,7 +57,7 @@ contract Lockbox is Ownable, ILockbox {
       uint256 curTime = block.timestamp;
       uint256 cnt = 0;
       for (uint256 i = 0; i < rewardInfos[_msgSender()].length; i ++) {
-         if (rewardInfos[_msgSender()][i].rewardDeadline >= curTime) {
+         if (rewardInfos[_msgSender()][i].rewardCreateTime + expiration >= curTime) {
             cnt ++;
          }
       }
@@ -71,7 +70,7 @@ contract Lockbox is Ownable, ILockbox {
       
       uint256 index = 0;
       for (uint256 i = 0; i < rewardInfos[_msgSender()].length; i ++) {
-         if (rewardInfos[_msgSender()][i].rewardDeadline < curTime) {
+         if (rewardInfos[_msgSender()][i].rewardCreateTime + expiration >= curTime) {
             cnt ++;
             infos[index++] = rewardInfos[_msgSender()][i];
          }
@@ -93,7 +92,7 @@ contract Lockbox is Ownable, ILockbox {
          uint256 length = rewardInfos[user_].length;
 
          for (uint256 j = 0; j < length; j ++) {
-            if (rewardInfos[user_][i].rewardDeadline < curTime_) {
+            if (rewardInfos[user_][i].rewardCreateTime + expiration < curTime_) {
                rewardableAmount += rewardInfos[user_][i].rewardAmount;
                rewardInfos[user_][i].rewardAmount = 0;
             }
@@ -110,7 +109,7 @@ contract Lockbox is Ownable, ILockbox {
          return 0;
       }
       for (uint256 i = 0; i < length; i ++) {
-         if (rewardInfos[user_][i].rewardDeadline >= curTime_) {
+         if (rewardInfos[user_][i].rewardCreateTime + expiration >= curTime_) {
             claimableReward += rewardInfos[user_][i].rewardAmount;
          }
       }
@@ -124,7 +123,7 @@ contract Lockbox is Ownable, ILockbox {
          return;
       }
       for (uint256 i = 0; i < length; i ++) {
-         if (rewardInfos[user_][i].rewardDeadline >= curTime_) {
+         if (rewardInfos[user_][i].rewardCreateTime + expiration >= curTime_) {
             rewardInfos[user_][i].rewardAmount = 0;
          }
       }
