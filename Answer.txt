@@ -1,0 +1,10 @@
+1. there is loss for lp providers
+2. reason is at end of the game, the almost a tokens were swapped with B token in LP.
+   So once LP provider burn the LP, provider get A and B token based on current lp token ratio.
+   A = totalAmount of A token * LP burn / LP total
+   B = totalAmount of B token * LP burn / LP total
+   So user will get really small amount of A and really much amount of B than user deposited at first.
+   Result is user lost his fund cuz even user has $1 A token , it's too small amount and for B token it cost 0.
+3. improve?
+   My suggestion is to make limitation in swap.
+   So make anti-whale swap( can swap some % of lp at max)
